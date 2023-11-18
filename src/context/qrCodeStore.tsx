@@ -49,9 +49,14 @@ const reducer = (state: QrCodeStore, action: Action): QrCodeStore => {
 };
 
 const parseQrCodeStore = (value: string | null): QrCodeStore => {
-  if (!checkString(value)) return [];
-  const qrCodeStore = JSON.parse(value) as QrCodeStore;
-  return Array.isArray(qrCodeStore) ? qrCodeStore : [];
+  try {
+    if (!checkString(value)) return [];
+    const qrCodeStore = JSON.parse(value) as QrCodeStore;
+    return Array.isArray(qrCodeStore) ? qrCodeStore : [];
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
 };
 
 type QrCodeStoreContext = {
