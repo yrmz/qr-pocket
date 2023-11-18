@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   const { state } = useContext(qrCodeStoreContext);
   return (
-    <Box marginY={5} marginX={30}>
+    <Box marginY={5} marginX={{ md: 30, sm: 5 }}>
       <Typography textAlign="center" variant="h4" marginBottom={5}>
         QR Pocket
       </Typography>
@@ -21,7 +21,7 @@ export default function Home() {
           <Typography variant="h5">QR Code List</Typography>
           <List>
             {state.map((qrCode) => (
-              <ListItem>
+              <ListItem key={qrCode.label}>
                 <Link href={`/qr/${qrCode.id}`}>{qrCode.label}</Link>
               </ListItem>
             ))}
