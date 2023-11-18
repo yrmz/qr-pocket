@@ -1,5 +1,7 @@
 import { createContext, useEffect, useReducer } from "react";
 
+import { checkString } from "@/utils/typeCheck";
+
 type Props = {
   children: React.ReactNode;
 };
@@ -21,7 +23,7 @@ const reducer = (state: QrCodeStore, action: Action): QrCodeStore => {
   const newState = (() => {
     switch (action.type) {
       case "add": {
-        const id = state.length ? state.splice(-1)[0].id + 1 : 0;
+        const id = state.length ? state.splice(-1)[0].id + 1 : 1;
         return [...state, { id, ...action.payload }];
       }
       case "remove": {
@@ -39,11 +41,17 @@ const reducer = (state: QrCodeStore, action: Action): QrCodeStore => {
         return action.payload;
       }
       default:
-        throw new Error(action satisfies never);
+        throw new Error("Action not recognized");
     }
   })();
   localStorage.setItem("qrCodeStore", JSON.stringify(newState));
   return newState;
+};
+
+const parseQrCodeStore = (value: string | null): QrCodeStore => {
+  if (!checkString(value)) return [];
+  const qrCodeStore = JSON.parse(value) as QrCodeStore;
+  return Array.isArray(qrCodeStore) ? qrCodeStore : [];
 };
 
 type QrCodeStoreContext = {
@@ -57,37 +65,15 @@ export const QrCodeStoreProvider: React.FC<Props> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, []);
 
   useEffect(() => {
-    const qrCodeStore = localStorage.getItem("qrCodeStore");
-    const qrCodeStoreInit = parseQrCodeStore(qrCodeStore);
+    const value = localStorage.getItem("qrCodeStore");
+    const qrCodeStoreInit = parseQrCodeStore(value);
     if (!qrCodeStoreInit.length || state === qrCodeStoreInit) return;
     dispatch({ type: "init", payload: qrCodeStoreInit });
   }, []);
 
-  console.log(state);
   return (
     <qrCodeStoreContext.Provider value={{ state, dispatch }}>
       {children}
     </qrCodeStoreContext.Provider>
   );
-};
-
-const parseQrCodeStore = (value: any): QrCodeStore => {
-  if (checkTypeQrCodeStore(value)) return value;
-  return [];
-};
-
-const checkTypeQrCodeStore = (value: any): value is QrCodeStore => {
-  try {
-    const array = JSON.parse(value);
-    if (!Array.isArray(array)) return false;
-    return array.every(
-      (obj) =>
-        typeof obj.id === "number" &&
-        typeof obj.label === "string" &&
-        typeof obj.url === "string"
-    );
-  } catch (e) {
-    console.error("Invalid JSON:", e);
-    return false;
-  }
 };

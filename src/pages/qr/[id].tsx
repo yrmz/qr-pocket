@@ -3,12 +3,14 @@ import { QRCodeSVG } from "qrcode.react";
 import { useContext } from "react";
 
 import { qrCodeStoreContext } from "@/context/qrCodeStore";
+import { checkString } from "@/utils/typeCheck";
+import HomeIcon from "@mui/icons-material/Home";
 import { Box, Link, Stack, Typography } from "@mui/material";
 
 const QrCode = () => {
   const router = useRouter();
   const { id } = router.query;
-  if (!checkId(id)) {
+  if (!checkString(id) || !id.trim().length) {
     return <NotFound />;
   }
 
@@ -17,18 +19,25 @@ const QrCode = () => {
   if (!qrCode) return <NotFound />;
 
   return (
-    <Stack
-      height="100vh"
-      alignContent="center"
-      alignItems="center"
-      justifyContent="center"
-      spacing={4}
-    >
-      <QRCodeSVG value={qrCode.url} color="#7d7d7d" size={230} />
-      <Link href={qrCode.url} color="ActiveCaption" underline="none">
-        <Typography variant="h4">{qrCode.label}</Typography>
-      </Link>
-    </Stack>
+    <>
+      <Box textAlign="right" padding={2}>
+        <Link href="/">
+          <HomeIcon fontSize="large" color="action" />
+        </Link>
+      </Box>
+      <Stack
+        height="80vh"
+        alignContent="center"
+        alignItems="center"
+        justifyContent="center"
+        spacing={4}
+      >
+        <QRCodeSVG value={qrCode.url} color="#7d7d7d" size={230} />
+        <Link href={qrCode.url} color="ActiveCaption" underline="none">
+          <Typography variant="h4">{qrCode.label}</Typography>
+        </Link>
+      </Stack>
+    </>
   );
 };
 
@@ -43,8 +52,5 @@ const NotFound: React.FC = () => (
     <Typography variant="h3">Not Found</Typography>
   </Stack>
 );
-
-const checkId = (id: string | string[] | undefined): id is string =>
-  typeof id === "string" && id.trim().length > 0;
 
 export default QrCode;

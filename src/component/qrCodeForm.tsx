@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
+import QRCode from "qrcode.react";
 import { FC, useContext, useReducer } from "react";
 
 import { qrCodeStoreContext } from "@/context/qrCodeStore";
-import { Box, Button, Stack, TextField } from "@mui/material";
+import { Box, Button, Divider, Stack, TextField } from "@mui/material";
 
 type QrCodeForm = {
   label: string;
@@ -40,7 +41,6 @@ const reducer = (state: QrCodeForm, action: Action) => {
 export const QrCodeForm: FC = () => {
   const { dispatch: qrCodeStoreDispatch } = useContext(qrCodeStoreContext);
   const [state, dispatch] = useReducer(reducer, qrCodeFormInit);
-  const router = useRouter();
   const handleUpdateState =
     (field: keyof typeof qrCodeFormInit) => (e: any) => {
       dispatch({ type: "update", field, value: e.target.value });
@@ -55,12 +55,13 @@ export const QrCodeForm: FC = () => {
   };
 
   return (
-    <Stack component="form" marginX={10} spacing={3} onSubmit={handleSubmit}>
+    <Stack component="form" spacing={3} onSubmit={handleSubmit}>
       <TextField
         id="label"
         label="ラベル"
         variant="standard"
         value={state.label}
+        autoComplete="off"
         required
         onChange={handleUpdateState("label")}
       />
@@ -69,14 +70,27 @@ export const QrCodeForm: FC = () => {
         label="URL"
         value={state.url}
         variant="standard"
+        autoComplete="off"
         required
         onChange={handleUpdateState("url")}
       />
-      <Box textAlign="center">
-        <Button variant="contained" color="primary" type="submit" size="large">
-          Generate
-        </Button>
-      </Box>
+      {state.url && (
+        <>
+          <Box textAlign="center" padding={2}>
+            <QRCode value={state.url} color="#7d7d7d" size={230} />
+          </Box>
+          <Box textAlign="center">
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              size="large"
+            >
+              Save
+            </Button>
+          </Box>
+        </>
+      )}
     </Stack>
   );
 };
