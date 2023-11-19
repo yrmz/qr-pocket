@@ -1,4 +1,10 @@
-import { createContext, useEffect, useReducer } from "react";
+import {
+  createContext,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useState,
+} from "react";
 
 import { checkString } from "@/utils/typeCheck";
 
@@ -16,11 +22,10 @@ type Action =
   | { type: "add"; payload: { label: string; url: string } }
   | { type: "remove"; payload: { id: number } }
   | { type: "update"; payload: { id: number; label: string; url: string } }
-  | { type: "reset"; payload: {} }
   | { type: "init"; payload: { id: number; label: string; url: string }[] };
 
 const reducer = (state: QrCodeStore, action: Action): QrCodeStore => {
-  const newState = (() => {
+  const newState = ((state: QrCodeStore, action: Action) => {
     switch (action.type) {
       case "add": {
         const id = state.length ? state.splice(-1)[0].id + 1 : 1;
@@ -34,16 +39,13 @@ const reducer = (state: QrCodeStore, action: Action): QrCodeStore => {
           qrCode.id === action.payload.id ? action.payload : qrCode
         );
       }
-      case "reset": {
-        return [];
-      }
       case "init": {
         return action.payload;
       }
       default:
         throw new Error("Action not recognized");
     }
-  })();
+  })(state, action);
   localStorage.setItem("qrCodeStore", JSON.stringify(newState));
   return newState;
 };
@@ -69,7 +71,7 @@ export const qrCodeStoreContext = createContext({} as QrCodeStoreContext);
 export const QrCodeStoreProvider: React.FC<Props> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const value = localStorage.getItem("qrCodeStore");
     const qrCodeStoreInit = parseQrCodeStore(value);
     if (!qrCodeStoreInit.length || state === qrCodeStoreInit) return;
