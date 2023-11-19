@@ -1,16 +1,17 @@
-import { useRouter } from "next/router";
-import { QRCodeSVG } from "qrcode.react";
-import { useContext } from "react";
+import { useRouter } from 'next/router';
+import { QRCodeSVG } from 'qrcode.react';
+import { useContext } from 'react';
 
-import { qrCodeStoreContext } from "@/context/qrCodeStore";
-import { checkString } from "@/utils/typeCheck";
-import HomeIcon from "@mui/icons-material/Home";
-import { Box, LinearProgress, Link, Stack, Typography } from "@mui/material";
+import { qrCodeStoreContext } from '@/context/qrCodeStore';
+import { checkString } from '@/utils/typeCheck';
+import HomeIcon from '@mui/icons-material/Home';
+import { Box, LinearProgress, Link, Stack, Typography } from '@mui/material';
 
 const QrCode = () => {
   const router = useRouter();
   const { state } = useContext(qrCodeStoreContext);
-  if (!state)
+  const { id } = router.query;
+  if (!state.length || !id)
     return (
       <Layout>
         <Typography variant="h6">Loading...</Typography>
@@ -20,16 +21,7 @@ const QrCode = () => {
       </Layout>
     );
 
-  const { id } = router.query;
-  if (!checkString(id) || !id.trim().length) {
-    return (
-      <Layout>
-        <NotFound />
-      </Layout>
-    );
-  }
-
-  const qrCode = state?.find((qrCode) => qrCode.id === Number(id));
+  const qrCode = state.find((qrCode) => qrCode.id.toString() === id);
   if (!qrCode)
     return (
       <Layout>
